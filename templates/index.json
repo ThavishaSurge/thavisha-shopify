@@ -11,6 +11,9 @@
   "sections": {
     "myduke_hero_wekVEp": {
       "type": "myduke-hero",
+      "custom_css": [
+        "div{padding-bottom: 20px;}"
+      ],
       "name": "MyDuke Hero",
       "settings": {
         "background_image": "shopify://shop_images/98010f6bd5789e80dbf8c882d79a544fdd88c158_1.png",
