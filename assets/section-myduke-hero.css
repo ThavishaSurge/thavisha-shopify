@@ -1,13 +1,13 @@
 .myduke-hero {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  min-height: 90vh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
   align-items: flex-end;
-  padding-bottom: 8rem;
+  padding: 8rem auto;
   background-color: #558c82;
   /* Fallback color */
 }
