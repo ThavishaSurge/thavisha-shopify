@@ -18,6 +18,72 @@
     margin-left: -1.2rem;
   }
 
+  {%- if section.settings.transparent_header -%}
+  .section-header {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+  }
+  .header-wrapper {
+    background: transparent !important;
+    border-bottom: none !important;
+    transition: background-color 0.3s ease;
+  }
+  .shopify-section-header-sticky.scrolled-past-header .header-wrapper {
+    background: #111 !important; 
+  }
+  .header__heading-link, 
+  .header__menu-item, 
+  .header__icon,
+  .header__active-menu-item {
+    color: #fff !important;
+  }
+  .header__menu-item:hover {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+  .header-btn {
+    border-color: #fff !important;
+    color: #fff !important;
+  }
+  .header-btn:hover {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+  {%- endif -%}
+
+  .header-buttons {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    margin-right: 1.5rem;
+  }
+  .header-btn {
+    background-color: transparent;
+    border: 1px solid currentColor;
+    color: inherit;
+    padding: 0.8rem 2.4rem;
+    text-decoration: none;
+    font-size: 1.4rem;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+  .header-btn:hover {
+    background-color: currentColor;
+    color: var(--gradient-background);
+  }
+
+  {%- if section.settings.hide_default_icons -%}
+  .header__icons .header__icon--search,
+  .header__icons .header__icon--account,
+  .header__icons .header__icon--cart,
+  .header__icons details-modal.header__search,
+  .header__icons #cart-icon-bubble {
+    display: none !important;
+  }
+  {%- endif -%}
+
   {%- if section.settings.sticky_header_type == 'reduce-logo-size' -%}
     .scrolled-past-header .header__heading-logo-wrapper {
       width: 75%;
@@ -201,6 +267,16 @@
     {%- endif -%}
 
     <div class="header__icons{% if section.settings.enable_country_selector or section.settings.enable_language_selector %} header__icons--localization header-localization{% endif %}">
+      {%- if section.settings.button_1_text != blank or section.settings.button_2_text != blank -%}
+        <div class="header-buttons small-hide">
+          {%- if section.settings.button_1_text != blank -%}
+            <a href="{{ section.settings.button_1_link | default: '#' }}" class="header-btn">{{ section.settings.button_1_text }}</a>
+          {%- endif -%}
+          {%- if section.settings.button_2_text != blank -%}
+            <a href="{{ section.settings.button_2_link | default: '#' }}" class="header-btn">{{ section.settings.button_2_text }}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
       <div class="desktop-localization-wrapper">
         {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
           <localization-form class="small-hide medium-hide" data-prevent-hide>
@@ -521,6 +597,44 @@
       "id": "show_line_separator",
       "default": true,
       "label": "t:sections.header.settings.show_line_separator.label"
+    },
+    {
+      "type": "header",
+      "content": "Custom Header Styles"
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_header",
+      "label": "Enable Transparent Header",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_default_icons",
+      "label": "Hide Default Icons (Search, User, Cart)",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_1_text",
+      "label": "Button 1 Text",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_1_link",
+      "label": "Button 1 Link"
+    },
+    {
+      "type": "text",
+      "id": "button_2_text",
+      "label": "Button 2 Text",
+      "default": "Get started"
+    },
+    {
+      "type": "url",
+      "id": "button_2_link",
+      "label": "Button 2 Link"
     },
     {
       "type": "header",

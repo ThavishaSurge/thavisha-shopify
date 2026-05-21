@@ -82,6 +82,10 @@
   padding: 0 1.5rem;
 }
 
+body.header {
+  max-width: 100% !important;
+}
+
 body:has(.section-header .drawer-menu) .announcement-bar-section .page-width {
   max-width: 100%;
 }
@@ -128,6 +132,7 @@ body:has(.section-header .drawer-menu) .announcement-bar-section .page-width {
   .header:not(.drawer-menu).page-width {
     padding-left: 5rem;
     padding-right: 5rem;
+    max-width: 100%;
   }
 
   .page-width--narrow {
@@ -2155,7 +2160,6 @@ input[type='checkbox'] {
   justify-content: center;
   flex-wrap: wrap;
   align-content: center;
-  background-color: red;
   grid-area: announcements;
 }
 

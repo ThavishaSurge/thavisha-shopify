@@ -1,0 +1,84 @@
+{{ 'section-myduke-hero.css' | asset_url | stylesheet_tag }}
+
+<div class="myduke-hero" style="{% if section.settings.background_image != blank %}background-image: url('{{ section.settings.background_image | image_url: width: 2000 }}');{% endif %}">
+  <div class="page-width">
+    <div class="myduke-hero__content">
+      {%- if section.settings.heading != blank -%}
+        <h1 class="myduke-hero__heading">{{ section.settings.heading | newline_to_br }}</h1>
+      {%- endif -%}
+      
+      {%- if section.settings.description != blank -%}
+        <div class="myduke-hero__description">{{ section.settings.description | newline_to_br }}</div>
+      {%- endif -%}
+      
+      <div class="myduke-hero__buttons">
+        {%- if section.settings.button_1_text != blank -%}
+          <a href="{{ section.settings.button_1_link | default: '#' }}" class="myduke-hero__btn myduke-hero__btn--primary">
+            {{ section.settings.button_1_text }}
+          </a>
+        {%- endif -%}
+        
+        {%- if section.settings.button_2_text != blank -%}
+          <a href="{{ section.settings.button_2_link | default: '#' }}" class="myduke-hero__btn myduke-hero__btn--secondary">
+            {{ section.settings.button_2_text }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "MyDuke Hero",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Clinical Support For\nNicotine Dependance"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "myduke offers safe and clinically appropriate pathways for smoking cessation, supported by healthcare professionals every step of the way."
+    },
+    {
+      "type": "text",
+      "id": "button_1_text",
+      "label": "Primary Button Text",
+      "default": "Apply For A Prescription"
+    },
+    {
+      "type": "url",
+      "id": "button_1_link",
+      "label": "Primary Button Link"
+    },
+    {
+      "type": "text",
+      "id": "button_2_text",
+      "label": "Secondary Button Text",
+      "default": "How It Works"
+    },
+    {
+      "type": "url",
+      "id": "button_2_link",
+      "label": "Secondary Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "MyDuke Hero",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
