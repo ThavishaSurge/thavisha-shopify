@@ -84,6 +84,7 @@
 
 body.header {
   max-width: 100% !important;
+  padding-top: 50px !important;
 }
 
 body:has(.section-header .drawer-menu) .announcement-bar-section .page-width {
