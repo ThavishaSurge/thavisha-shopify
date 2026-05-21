@@ -7,7 +7,7 @@
   display: grid;
 }
 
-.collage__item > * {
+.collage__item>* {
   width: 100%;
 }
 
@@ -128,8 +128,7 @@
   position: absolute;
   z-index: -1;
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-horizontal-offset) var(--shadow-vertical-offset) var(--shadow-blur-radius)
-    rgba(var(--color-shadow), var(--shadow-opacity));
+  box-shadow: var(--shadow-horizontal-offset) var(--shadow-vertical-offset) var(--shadow-blur-radius) rgba(var(--color-shadow), var(--shadow-opacity));
   width: calc(var(--border-width) * 2 + 100%);
   height: calc(var(--border-width) * 2 + 100%);
   top: calc(var(--border-width) * -1);
