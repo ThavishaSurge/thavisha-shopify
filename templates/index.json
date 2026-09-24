@@ -9,24 +9,54 @@
  */
 {
   "sections": {
-    "myduke_hero_wekVEp": {
-      "type": "myduke-hero",
-      "custom_css": [
-        "div{padding-bottom: 20px;}"
-      ],
-      "name": "MyDuke Hero",
+    "header": {
+      "type": "landing-header",
       "settings": {
-        "background_image": "shopify://shop_images/98010f6bd5789e80dbf8c882d79a544fdd88c158_1.png",
-        "heading": "Clinical Support For\nNicotine Dependance",
-        "description": "myduke offers safe and clinically appropriate pathways for smoking cessation, supported by healthcare professionals every step of the way.",
-        "button_1_text": "Apply For A Prescription",
-        "button_1_link": "",
-        "button_2_text": "How It Works",
-        "button_2_link": ""
+        "logo_width": 180,
+        "alignment": "center",
+        "background": "#154c8c",
+        "text_color": "#ffffff",
+        "padding_vertical": 28
+      }
+    },
+    "signup": {
+      "type": "landing-signup",
+      "blocks": {
+        "zip": {
+          "type": "question",
+          "settings": {
+            "label": "Zip code",
+            "key": "Zip code",
+            "type": "postal",
+            "options": "",
+            "required": false
+          }
+        }
+      },
+      "block_order": [
+        "zip"
+      ],
+      "settings": {
+        "heading": "Join the list",
+        "heading_size": "h1",
+        "subheading": "<p>Sign up and we'll send you early access.</p>",
+        "sheet_endpoint": "https://script.google.com/macros/s/AKfycbwJP1IARMP_YIQdJK5hUESBvfTuuArTwdZP_RvecpL5kOWs6zSuKmXddGPfSotaysPzWw/exec",
+        "customer_tags": "landing-page",
+        "show_phone": true,
+        "phone_label": "Phone",
+        "phone_required": false,
+        "consent_label": "<p>Yes, email me news and offers. I can unsubscribe at any time.</p>",
+        "button_label": "Sign me up",
+        "success_heading": "You're in!",
+        "success_text": "<p>Check your inbox — we'll be in touch shortly.</p>",
+        "color_scheme": "scheme-1",
+        "padding_top": 0,
+        "padding_bottom": 0
       }
     }
   },
   "order": [
-    "myduke_hero_wekVEp"
+    "header",
+    "signup"
   ]
 }
