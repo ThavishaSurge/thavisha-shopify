@@ -1,0 +1,127 @@
+{%- comment -%}
+  Minimal logo bar for distraction-free landing pages. Deliberately has no
+  navigation: these pages drop the theme header so nothing competes with the
+  form. Upload the logo under this section's settings in the theme editor.
+{%- endcomment -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section.settings.background }};
+  }
+
+  .landing-header-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    justify-content: {{ section.settings.alignment }};
+    padding: {{ section.settings.padding_vertical | times: 0.7 | round: 0 }}px 2rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .landing-header-{{ section.id }} {
+      padding: {{ section.settings.padding_vertical }}px 2rem;
+    }
+  }
+
+  .landing-header-{{ section.id }} .landing-header__logo {
+    display: block;
+    width: {{ section.settings.logo_width | times: 0.8 | round: 0 }}px;
+    max-width: 100%;
+    height: auto;
+  }
+
+  @media screen and (min-width: 750px) {
+    .landing-header-{{ section.id }} .landing-header__logo {
+      width: {{ section.settings.logo_width }}px;
+    }
+  }
+
+  .landing-header-{{ section.id }} .landing-header__name {
+    color: {{ section.settings.text_color }};
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+{%- endstyle -%}
+
+<div class="landing-header-{{ section.id }}">
+  {%- if section.settings.logo != blank -%}
+    {{
+      section.settings.logo
+      | image_url: width: 800
+      | image_tag:
+        class: 'landing-header__logo',
+        loading: 'eager',
+        widths: '100, 200, 300, 400, 600, 800',
+        alt: shop.name
+    }}
+  {%- else -%}
+    {%- comment -%} Keeps the bar from looking broken before a logo is uploaded. {%- endcomment -%}
+    <p class="landing-header__name">{{ shop.name }}</p>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Landing header",
+  "tag": "section",
+  "class": "landing-header-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo",
+      "info": "Falls back to the store name until one is uploaded."
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 60,
+      "max": 360,
+      "step": 10,
+      "unit": "px",
+      "default": 180,
+      "label": "Logo width",
+      "info": "Scaled to 80% on mobile."
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "flex-start", "label": "Left" },
+        { "value": "flex-end", "label": "Right" }
+      ],
+      "default": "center",
+      "label": "Logo position"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "default": "#154c8c",
+      "label": "Background color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "default": "#ffffff",
+      "label": "Fallback text color",
+      "info": "Only used before a logo is uploaded."
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 28,
+      "label": "Vertical padding"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Landing header"
+    }
+  ]
+}
+{% endschema %}
