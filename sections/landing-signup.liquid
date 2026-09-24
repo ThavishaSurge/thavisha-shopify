@@ -1,0 +1,516 @@
+{%- comment -%}
+  Landing page signup form.
+
+  Creates a Shopify customer record via the native 'customer' form tag, and
+  mirrors every submitted field to a Google Sheet through an Apps Script Web App.
+
+  The native form only persists email, first_name, last_name and tags. Phone and
+  any question blocks are therefore NOT sent to Shopify (they would be dropped);
+  they are held in sessionStorage and posted to the Sheet only once Shopify has
+  confirmed the customer was accepted. See assets/landing-signup.js.
+{%- endcomment -%}
+
+{{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'landing-signup.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .landing-signup__fields {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  @media screen and (min-width: 750px) {
+    .landing-signup__fields--split {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .landing-signup__consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin: 2rem 0;
+  }
+
+  .landing-signup__consent input {
+    flex: 0 0 auto;
+    margin-top: 0.3rem;
+  }
+
+  .landing-signup__consent-label {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.5;
+  }
+
+  .landing-signup__consent-label p {
+    margin: 0;
+  }
+
+  .landing-signup__button {
+    margin-top: 1rem;
+  }
+
+  .landing-signup__subheading {
+    margin-bottom: 2.5rem;
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign form_id = 'LandingSignup-' | append: section.id
+-%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+  <landing-signup
+    class="landing-signup page-width page-width--narrow section-{{ section.id }}-padding"
+    data-endpoint="{{ section.settings.sheet_endpoint }}"
+    data-section-id="{{ section.id }}"
+  >
+    {%- if section.settings.heading != blank -%}
+      <h2 class="title title-wrapper--no-top-margin inline-richtext {{ section.settings.heading_size }}">
+        {{ section.settings.heading }}
+      </h2>
+    {%- endif -%}
+
+    {%- if section.settings.subheading != blank -%}
+      <div class="landing-signup__subheading rte">{{ section.settings.subheading }}</div>
+    {%- endif -%}
+
+    {%- form 'customer', id: form_id, class: 'landing-signup__form isolate' -%}
+      {%- if form.posted_successfully? -%}
+        <div class="form-status-list form__message" data-signup-success>
+          <h2 class="form-status" tabindex="-1" autofocus>
+            {{- 'icon-success.svg' | inline_asset_content -}}
+            {{ section.settings.success_heading }}
+          </h2>
+          {%- if section.settings.success_text != blank -%}
+            <div class="rte">{{ section.settings.success_text }}</div>
+          {%- endif -%}
+        </div>
+      {%- else -%}
+        {%- if form.errors -%}
+          <div class="form__message">
+            <h2 class="form-status caption-large text-body" role="alert" tabindex="-1" autofocus>
+              {{- 'icon-error.svg' | inline_asset_content -}}
+              {{ 'templates.contact.form.error_heading' | t }}
+            </h2>
+          </div>
+          <ul class="form-status-list caption-large" role="list">
+            {%- for field in form.errors -%}
+              <li>
+                {%- if field == 'form' -%}
+                  {{ form.errors.messages[field] }}
+                {%- else -%}
+                  <a href="#{{ form_id }}-{{ field }}" class="link">
+                    {{ form.errors.translated_fields[field] | capitalize }}
+                    {{ form.errors.messages[field] }}
+                  </a>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        {%- comment -%} Segments these signups in admin, and lets Flow target them later. {%- endcomment -%}
+        <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tags | escape }}">
+
+        <div class="landing-signup__fields landing-signup__fields--split">
+          <div class="field">
+            <input
+              class="field__input"
+              type="text"
+              id="{{ form_id }}-first_name"
+              name="contact[first_name]"
+              value="{{ form.first_name }}"
+              autocomplete="given-name"
+              required
+              placeholder="{{ 'customer.register.first_name' | t }}"
+            >
+            <label class="field__label" for="{{ form_id }}-first_name">
+              {{- 'customer.register.first_name' | t }}
+              <span aria-hidden="true">*</span></label
+            >
+          </div>
+
+          <div class="field">
+            <input
+              class="field__input"
+              type="text"
+              id="{{ form_id }}-last_name"
+              name="contact[last_name]"
+              value="{{ form.last_name }}"
+              autocomplete="family-name"
+              required
+              placeholder="{{ 'customer.register.last_name' | t }}"
+            >
+            <label class="field__label" for="{{ form_id }}-last_name">
+              {{- 'customer.register.last_name' | t }}
+              <span aria-hidden="true">*</span></label
+            >
+          </div>
+        </div>
+
+        <div class="landing-signup__fields">
+          <div class="field field--with-error">
+            <input
+              class="field__input"
+              type="email"
+              id="{{ form_id }}-email"
+              name="contact[email]"
+              value="{{ form.email }}"
+              autocomplete="email"
+              spellcheck="false"
+              autocapitalize="off"
+              required
+              aria-required="true"
+              {% if form.errors contains 'email' %}
+                aria-invalid="true"
+                aria-describedby="{{ form_id }}-email-error"
+              {% endif %}
+              placeholder="{{ 'customer.register.email' | t }}"
+            >
+            <label class="field__label" for="{{ form_id }}-email">
+              {{- 'customer.register.email' | t }}
+              <span aria-hidden="true">*</span></label
+            >
+            {%- if form.errors contains 'email' -%}
+              <small class="contact__field-error" id="{{ form_id }}-email-error">
+                <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+                <span class="form__message">
+                  <span class="svg-wrapper">{{- 'icon-error.svg' | inline_asset_content -}}</span>
+                  {{- form.errors.translated_fields.email | capitalize }}
+                  {{ form.errors.messages.email -}}
+                </span>
+              </small>
+            {%- endif -%}
+          </div>
+
+          {%- comment -%}
+            Everything below is Sheet-only: Shopify's customer form does not persist
+            these, so they are deliberately not prefixed with contact[].
+          {%- endcomment -%}
+          {%- if section.settings.show_phone -%}
+            <div class="field">
+              <input
+                class="field__input"
+                type="tel"
+                id="{{ form_id }}-phone"
+                name="extra[phone]"
+                autocomplete="tel"
+                data-extra-field
+                data-key="{{ section.settings.phone_label | escape }}"
+                {% if section.settings.phone_required %}required{% endif %}
+                placeholder="{{ section.settings.phone_label | escape }}"
+              >
+              <label class="field__label" for="{{ form_id }}-phone">
+                {{- section.settings.phone_label -}}
+                {%- if section.settings.phone_required %} <span aria-hidden="true">*</span>{% endif -%}
+              </label>
+            </div>
+          {%- endif -%}
+
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign field_id = form_id | append: '-block-' | append: block.id
+              assign column = block.settings.key | default: block.settings.label
+            -%}
+            <div class="field" {{ block.shopify_attributes }}>
+              {%- case block.settings.type -%}
+                {%- when 'textarea' -%}
+                  <textarea
+                    class="text-area field__input"
+                    rows="4"
+                    id="{{ field_id }}"
+                    name="extra[{{ column | escape }}]"
+                    data-extra-field
+                    data-key="{{ column | escape }}"
+                    {% if block.settings.required %}required{% endif %}
+                    placeholder="{{ block.settings.label | escape }}"
+                  ></textarea>
+
+                {%- when 'select' -%}
+                  <select
+                    class="select__select field__input"
+                    id="{{ field_id }}"
+                    name="extra[{{ column | escape }}]"
+                    data-extra-field
+                    data-key="{{ column | escape }}"
+                    {% if block.settings.required %}required{% endif %}
+                  >
+                    <option value="">{{ block.settings.label }}</option>
+                    {%- assign options = block.settings.options | newline_to_br | split: '<br />' -%}
+                    {%- for option in options -%}
+                      {%- assign trimmed = option | strip -%}
+                      {%- if trimmed != blank -%}
+                        <option value="{{ trimmed | escape }}">{{ trimmed }}</option>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </select>
+
+                {%- else -%}
+                  <input
+                    class="field__input"
+                    type="{{ block.settings.type }}"
+                    id="{{ field_id }}"
+                    name="extra[{{ column | escape }}]"
+                    data-extra-field
+                    data-key="{{ column | escape }}"
+                    {% if block.settings.required %}required{% endif %}
+                    placeholder="{{ block.settings.label | escape }}"
+                  >
+              {%- endcase -%}
+              <label class="field__label" for="{{ field_id }}">
+                {{- block.settings.label -}}
+                {%- if block.settings.required %} <span aria-hidden="true">*</span>{% endif -%}
+              </label>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- comment -%}
+          Required by design: the 'customer' form tag always sets accepts_marketing to
+          true, so consent has to be a precondition of submitting rather than an
+          optional toggle. The checked value is logged to the Sheet as the record.
+        {%- endcomment -%}
+        <div class="landing-signup__consent">
+          <input
+            type="checkbox"
+            id="{{ form_id }}-consent"
+            name="extra[marketing_consent]"
+            value="yes"
+            data-extra-field
+            data-key="Marketing consent"
+            data-consent
+            required
+          >
+          <label class="landing-signup__consent-label rte" for="{{ form_id }}-consent">
+            {{ section.settings.consent_label }}
+          </label>
+        </div>
+
+        <div class="landing-signup__button">
+          <button type="submit" class="button">
+            {{ section.settings.button_label }}
+          </button>
+        </div>
+      {%- endif -%}
+    {%- endform -%}
+  </landing-signup>
+</div>
+
+{% schema %}
+{
+  "name": "Landing signup",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "Join the list",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        { "value": "h2", "label": "Small" },
+        { "value": "h1", "label": "Medium" },
+        { "value": "h0", "label": "Large" },
+        { "value": "hxl", "label": "Extra large" }
+      ],
+      "default": "h1",
+      "label": "Heading size"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "default": "<p>Sign up and we'll send you early access.</p>",
+      "label": "Subheading"
+    },
+    {
+      "type": "header",
+      "content": "Google Sheet"
+    },
+    {
+      "type": "paragraph",
+      "content": "Paste the Apps Script Web App URL here. It is a public endpoint, so it is safe in theme code. Leave blank to disable the Sheet sync."
+    },
+    {
+      "type": "text",
+      "id": "sheet_endpoint",
+      "label": "Apps Script Web App URL",
+      "info": "Ends in /exec"
+    },
+    {
+      "type": "header",
+      "content": "Customer record"
+    },
+    {
+      "type": "text",
+      "id": "customer_tags",
+      "default": "landing-page",
+      "label": "Tags to apply",
+      "info": "Comma-separated. Used to segment these signups in admin."
+    },
+    {
+      "type": "header",
+      "content": "Phone"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_phone",
+      "default": true,
+      "label": "Ask for a phone number",
+      "info": "Saved to the Google Sheet only. Shopify's customer form does not store phone numbers."
+    },
+    {
+      "type": "text",
+      "id": "phone_label",
+      "default": "Phone",
+      "label": "Phone label"
+    },
+    {
+      "type": "checkbox",
+      "id": "phone_required",
+      "default": false,
+      "label": "Require phone"
+    },
+    {
+      "type": "header",
+      "content": "Consent"
+    },
+    {
+      "type": "paragraph",
+      "content": "This checkbox is always required. Submitting the form opts the customer into email marketing, so consent must be given before the form can be sent."
+    },
+    {
+      "type": "richtext",
+      "id": "consent_label",
+      "default": "<p>Yes, email me news and offers. I can unsubscribe at any time.</p>",
+      "label": "Consent text"
+    },
+    {
+      "type": "header",
+      "content": "Submit and confirmation"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "default": "Sign me up",
+      "label": "Button label"
+    },
+    {
+      "type": "text",
+      "id": "success_heading",
+      "default": "You're in!",
+      "label": "Success heading"
+    },
+    {
+      "type": "richtext",
+      "id": "success_text",
+      "default": "<p>Check your inbox — we'll be in touch shortly.</p>",
+      "label": "Success message"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 52
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 52
+    }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "default": "How did you hear about us?",
+          "label": "Label"
+        },
+        {
+          "type": "text",
+          "id": "key",
+          "label": "Google Sheet column",
+          "info": "Defaults to the label. Must match the header row in your Sheet."
+        },
+        {
+          "type": "select",
+          "id": "type",
+          "options": [
+            { "value": "text", "label": "Short text" },
+            { "value": "textarea", "label": "Long text" },
+            { "value": "select", "label": "Dropdown" },
+            { "value": "tel", "label": "Phone" },
+            { "value": "email", "label": "Email" },
+            { "value": "url", "label": "URL" }
+          ],
+          "default": "text",
+          "label": "Field type"
+        },
+        {
+          "type": "textarea",
+          "id": "options",
+          "default": "Instagram\nA friend\nSearch\nOther",
+          "label": "Dropdown options",
+          "info": "One per line. Dropdown only."
+        },
+        {
+          "type": "checkbox",
+          "id": "required",
+          "default": false,
+          "label": "Required"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Landing signup",
+      "blocks": [{ "type": "question" }]
+    }
+  ]
+}
+{% endschema %}
