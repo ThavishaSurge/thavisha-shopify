@@ -9,22 +9,32 @@
  */
 {
   "sections": {
+    "header": {
+      "type": "landing-header",
+      "settings": {
+        "logo_width": 180,
+        "alignment": "center",
+        "background": "#154c8c",
+        "text_color": "#ffffff",
+        "padding_vertical": 28
+      }
+    },
     "signup": {
       "type": "landing-signup",
       "blocks": {
-        "question": {
+        "zip": {
           "type": "question",
           "settings": {
-            "label": "How did you hear about us?",
-            "key": "How did you hear about us?",
-            "type": "select",
-            "options": "Instagram\nA friend\nSearch\nOther",
+            "label": "Zip code",
+            "key": "Zip code",
+            "type": "postal",
+            "options": "",
             "required": false
           }
         }
       },
       "block_order": [
-        "question"
+        "zip"
       ],
       "settings": {
         "heading": "Join the list",
@@ -46,6 +56,7 @@
     }
   },
   "order": [
+    "header",
     "signup"
   ]
 }
