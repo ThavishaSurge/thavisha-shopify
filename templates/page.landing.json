@@ -9,41 +9,6 @@
  */
 {
   "sections": {
-    "banner": {
-      "type": "image-banner",
-      "blocks": {
-        "heading": {
-          "type": "heading",
-          "settings": {
-            "heading": "Early access",
-            "heading_size": "hxl"
-          }
-        },
-        "text": {
-          "type": "text",
-          "settings": {
-            "text": "Be first in line when we launch.",
-            "text_style": "subtitle"
-          }
-        }
-      },
-      "block_order": [
-        "heading",
-        "text"
-      ],
-      "settings": {
-        "image_overlay_opacity": 20,
-        "image_height": "medium",
-        "desktop_content_position": "middle-center",
-        "show_text_box": true,
-        "desktop_content_alignment": "center",
-        "color_scheme": "scheme-1",
-        "image_behavior": "none",
-        "mobile_content_alignment": "center",
-        "stack_images_on_mobile": true,
-        "show_text_below": true
-      }
-    },
     "signup": {
       "type": "landing-signup",
       "blocks": {
@@ -70,25 +35,17 @@
         "show_phone": true,
         "phone_label": "Phone",
         "phone_required": false,
-        "show_upload": true,
-        "upload_label": "Add a photo",
-        "upload_hint": "PNG, JPG or WEBP",
-        "upload_column": "Image",
-        "upload_accept": "image/png,image/jpeg,image/webp",
-        "upload_max_mb": 10,
-        "upload_required": false,
         "consent_label": "<p>Yes, email me news and offers. I can unsubscribe at any time.</p>",
         "button_label": "Sign me up",
         "success_heading": "You're in!",
         "success_text": "<p>Check your inbox — we'll be in touch shortly.</p>",
         "color_scheme": "scheme-1",
-        "padding_top": 52,
-        "padding_bottom": 52
+        "padding_top": 0,
+        "padding_bottom": 0
       }
     }
   },
   "order": [
-    "banner",
     "signup"
   ]
 }

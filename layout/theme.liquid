@@ -298,22 +298,37 @@
     </script>
   </head>
 
-  <body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
+  {%- comment -%}
+    Distraction-free templates (page.landing) drop the header, footer and cart
+    drawer so nothing competes with the page's single call to action. Add a
+    suffix to this list to opt another template in.
+  {%- endcomment -%}
+  {%- assign bare_templates = 'landing' | split: ',' -%}
+  {%- assign is_bare = false -%}
+  {%- if bare_templates contains template.suffix -%}
+    {%- assign is_bare = true -%}
+  {%- endif -%}
+
+  <body class="gradient{% if is_bare %} template--bare{% endif %}{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
     <a class="skip-to-content-link button visually-hidden" href="#MainContent">
       {{ 'accessibility.skip_to_text' | t }}
     </a>
 
-    {%- if settings.cart_type == 'drawer' -%}
+    {%- if settings.cart_type == 'drawer' and is_bare == false -%}
       {%- render 'cart-drawer' -%}
     {%- endif -%}
 
-    {% sections 'header-group' %}
+    {%- unless is_bare -%}
+      {% sections 'header-group' %}
+    {%- endunless -%}
 
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
       {{ content_for_layout }}
     </main>
 
-    {% sections 'footer-group' %}
+    {%- unless is_bare -%}
+      {% sections 'footer-group' %}
+    {%- endunless -%}
 
     <ul hidden>
       <li id="a11y-refresh-page-message">{{ 'accessibility.refresh_page' | t }}</li>
