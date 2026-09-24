@@ -299,15 +299,24 @@
   </head>
 
   {%- comment -%}
-    Distraction-free templates (page.landing) drop the header, footer and cart
-    drawer so nothing competes with the page's single call to action. Add a
-    suffix to this list to opt another template in.
+    Distraction-free templates drop the header, footer and cart drawer so
+    nothing competes with the page's single call to action. Listed by template
+    name, with the suffix appended where there is one ('index', 'page.landing').
+    Add an entry to opt another template in.
   {%- endcomment -%}
-  {%- assign bare_templates = 'landing' | split: ',' -%}
-  {%- assign is_bare = false -%}
-  {%- if bare_templates contains template.suffix -%}
-    {%- assign is_bare = true -%}
-  {%- endif -%}
+  {%- liquid
+    assign bare_templates = 'index,page.landing' | split: ','
+
+    assign template_id = template.name
+    if template.suffix != blank
+      assign template_id = template.name | append: '.' | append: template.suffix
+    endif
+
+    assign is_bare = false
+    if bare_templates contains template_id
+      assign is_bare = true
+    endif
+  -%}
 
   <body class="gradient{% if is_bare %} template--bare{% endif %}{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
     <a class="skip-to-content-link button visually-hidden" href="#MainContent">
