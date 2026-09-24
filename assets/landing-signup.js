@@ -26,14 +26,137 @@ class LandingSignup extends HTMLElement {
     if (!this.form) return;
     this.restore();
     this.initUpload();
+    this.initValidation();
     this.form.addEventListener('submit', (event) => {
-      if (!this.validateUpload()) {
+      if (!this.validate() || !this.validateUpload()) {
         event.preventDefault();
         return;
       }
       this.form.classList.add('is-submitting');
       this.stash();
     });
+  }
+
+  /* -- validation -------------------------------------------------------- */
+
+  initValidation() {
+    // Phone inputs reject stray characters as they are typed. `type="tel"` does
+    // no validation of its own, so without this a phone field accepts prose.
+    this.form.querySelectorAll('[data-validate="phone"]').forEach((input) => {
+      input.addEventListener('input', () => {
+        const cleaned = input.value.replace(/[^0-9+()\-.\s]/g, '');
+        if (cleaned !== input.value) {
+          // Preserve the caret, which would otherwise jump to the end.
+          const at = input.selectionStart - (input.value.length - cleaned.length);
+          input.value = cleaned;
+          input.setSelectionRange(at, at);
+        }
+      });
+    });
+
+    // Re-check a field once it has been corrected, but never before the first
+    // submit — warning someone mid-type about an email they are still writing
+    // is noise, not help.
+    this.form.addEventListener(
+      'blur',
+      (event) => {
+        if (this.submitted && event.target.matches('input, select, textarea')) {
+          this.checkField(event.target);
+        }
+      },
+      true
+    );
+  }
+
+  validate() {
+    this.submitted = true;
+
+    const fields = this.form.querySelectorAll('input, select, textarea');
+    let firstInvalid = null;
+
+    fields.forEach((field) => {
+      if (!this.checkField(field) && !firstInvalid) firstInvalid = field;
+    });
+
+    if (firstInvalid) {
+      firstInvalid.focus();
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+    return true;
+  }
+
+  /** Returns true when valid; paints or clears the message either way. */
+  checkField(field) {
+    const message = this.errorFor(field);
+    this.setFieldError(field, message);
+    return !message;
+  }
+
+  errorFor(field) {
+    const value = field.value.trim();
+    const label = this.labelFor(field);
+
+    if (field.type === 'checkbox') {
+      return field.required && !field.checked ? 'Please tick this box to continue.' : '';
+    }
+
+    if (field.required && !value) return `${label} is required.`;
+    if (!value) return '';
+
+    switch (field.dataset.validate) {
+      case 'email':
+        // Deliberately loose: something@something.tld. Anything stricter starts
+        // rejecting valid addresses.
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value) ? '' : 'Enter a valid email address.';
+
+      case 'phone': {
+        const digits = value.replace(/\D/g, '');
+        if (digits.length < 7) return 'Enter a valid phone number.';
+        if (digits.length > 15) return 'That phone number is too long.';
+        return '';
+      }
+
+      case 'postal':
+        return /^[A-Za-z0-9][A-Za-z0-9 -]{2,9}$/.test(value) ? '' : 'Enter a valid zip code.';
+
+      default:
+        return '';
+    }
+  }
+
+  labelFor(field) {
+    const wrapper = field.closest('.field') || field.parentElement;
+    const label = wrapper && wrapper.querySelector('.field__label');
+    const text = label ? label.textContent : field.placeholder;
+    return (text || 'This field').replace('*', '').trim();
+  }
+
+  /** Inserts the message element on demand rather than bloating the markup. */
+  setFieldError(field, message) {
+    const wrapper = field.closest('.field') || field.closest('.landing-signup__consent');
+    if (!wrapper) return;
+
+    let error = wrapper.querySelector('[data-field-error]');
+
+    if (!message) {
+      wrapper.classList.remove('field--error');
+      field.removeAttribute('aria-invalid');
+      if (error) error.remove();
+      return;
+    }
+
+    if (!error) {
+      error = document.createElement('small');
+      error.className = 'landing-signup__error';
+      error.setAttribute('data-field-error', '');
+      error.setAttribute('role', 'alert');
+      wrapper.appendChild(error);
+    }
+
+    error.textContent = message;
+    wrapper.classList.add('field--error');
+    field.setAttribute('aria-invalid', 'true');
   }
 
   /* -- image upload ------------------------------------------------------ */
