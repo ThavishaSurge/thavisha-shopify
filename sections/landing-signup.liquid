@@ -52,7 +52,7 @@
 
       <div class="landing-signup__card">
 
-    {%- form 'customer', id: form_id, class: 'landing-signup__form isolate' -%}
+    {%- form 'customer', id: form_id, class: 'landing-signup__form isolate', novalidate: 'novalidate' -%}
       {%- if form.posted_successfully? -%}
         <div class="landing-signup__success form__message" data-signup-success>
           <h2 class="form-status" tabindex="-1" autofocus>
@@ -135,6 +135,7 @@
               name="contact[email]"
               value="{{ form.email }}"
               autocomplete="email"
+              data-validate="email"
               spellcheck="false"
               autocapitalize="off"
               required
@@ -173,6 +174,8 @@
                 id="{{ form_id }}-phone"
                 name="extra[phone]"
                 autocomplete="tel"
+                inputmode="tel"
+                data-validate="phone"
                 data-extra-field
                 data-key="{{ section.settings.phone_label | escape }}"
                 {% if section.settings.phone_required %}required{% endif %}
@@ -192,14 +195,20 @@
 
               assign input_type = block.settings.type
               assign autocomplete = 'off'
+              assign validate = ''
+              assign inputmode = ''
               case block.settings.type
                 when 'postal'
                   assign input_type = 'text'
                   assign autocomplete = 'postal-code'
+                  assign validate = 'postal'
                 when 'tel'
                   assign autocomplete = 'tel'
+                  assign validate = 'phone'
+                  assign inputmode = 'tel'
                 when 'email'
                   assign autocomplete = 'email'
+                  assign validate = 'email'
               endcase
             -%}
             <div class="field" {{ block.shopify_attributes }}>
@@ -242,6 +251,8 @@
                     id="{{ field_id }}"
                     name="extra[{{ column | escape }}]"
                     autocomplete="{{ autocomplete }}"
+                    {% if inputmode != blank %}inputmode="{{ inputmode }}"{% endif %}
+                    {% if validate != blank %}data-validate="{{ validate }}"{% endif %}
                     data-extra-field
                     data-key="{{ column | escape }}"
                     {% if block.settings.required %}required{% endif %}
