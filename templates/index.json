@@ -12,6 +12,7 @@
     "header": {
       "type": "landing-header",
       "settings": {
+        "logo": "shopify://shop_images/WI-Logo_White_3x_e7f3afaa-dff2-4283-9367-3501d26c6316.avif",
         "logo_width": 180,
         "alignment": "center",
         "background": "#154c8c",
@@ -37,14 +38,21 @@
         "zip"
       ],
       "settings": {
-        "heading": "Join the list",
+        "heading": "Rebate Form",
         "heading_size": "h1",
-        "subheading": "<p>Sign up and we'll send you early access.</p>",
+        "subheading": "<p>Submit and we'll get back to you shortly!</p>",
         "sheet_endpoint": "https://script.google.com/macros/s/AKfycbwJP1IARMP_YIQdJK5hUESBvfTuuArTwdZP_RvecpL5kOWs6zSuKmXddGPfSotaysPzWw/exec",
         "customer_tags": "landing-page",
         "show_phone": true,
         "phone_label": "Phone",
         "phone_required": false,
+        "show_upload": true,
+        "upload_label": "Add a photo",
+        "upload_hint": "PNG, JPG or WEBP",
+        "upload_column": "Image",
+        "upload_accept": "image/png,image/jpeg,image/webp",
+        "upload_max_mb": 10,
+        "upload_required": false,
         "consent_label": "<p>Yes, email me news and offers. I can unsubscribe at any time.</p>",
         "button_label": "Sign me up",
         "success_heading": "You're in!",
