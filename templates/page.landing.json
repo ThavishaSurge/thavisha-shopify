@@ -65,7 +65,7 @@
         "heading": "Join the list",
         "heading_size": "h1",
         "subheading": "<p>Sign up and we'll send you early access.</p>",
-        "sheet_endpoint": "https://script.google.com/macros/s/AKfycbyQjlqQGVfnVicGEMdnHF8JB-JDc8bDeiT-mCq7CfrX0gzSCOehROIZC9c6CnXOhiQu-g/exec",
+        "sheet_endpoint": "https://script.google.com/macros/s/AKfycbytWnSAUlDzeyhqrb_KCvsynan8PXN4aFyjmuK05ONDt0qLEsidq9eYzpsgT5fkxd59rA/exec",
         "customer_tags": "landing-page",
         "show_phone": true,
         "phone_label": "Phone",
