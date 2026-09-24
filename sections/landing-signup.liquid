@@ -189,6 +189,18 @@
             {%- liquid
               assign field_id = form_id | append: '-block-' | append: block.id
               assign column = block.settings.key | default: block.settings.label
+
+              assign input_type = block.settings.type
+              assign autocomplete = 'off'
+              case block.settings.type
+                when 'postal'
+                  assign input_type = 'text'
+                  assign autocomplete = 'postal-code'
+                when 'tel'
+                  assign autocomplete = 'tel'
+                when 'email'
+                  assign autocomplete = 'email'
+              endcase
             -%}
             <div class="field" {{ block.shopify_attributes }}>
               {%- case block.settings.type -%}
@@ -226,9 +238,10 @@
                 {%- else -%}
                   <input
                     class="field__input"
-                    type="{{ block.settings.type }}"
+                    type="{{ input_type }}"
                     id="{{ field_id }}"
                     name="extra[{{ column | escape }}]"
+                    autocomplete="{{ autocomplete }}"
                     data-extra-field
                     data-key="{{ column | escape }}"
                     {% if block.settings.required %}required{% endif %}
@@ -331,7 +344,7 @@
 {
   "name": "Landing signup",
   "tag": "section",
-  "class": "section",
+  "class": "section landing-signup-section",
   "disabled_on": {
     "groups": [
       "header",
@@ -577,6 +590,10 @@
             {
               "value": "select",
               "label": "Dropdown"
+            },
+            {
+              "value": "postal",
+              "label": "Postal / zip code"
             },
             {
               "value": "tel",
