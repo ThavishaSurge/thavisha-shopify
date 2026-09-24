@@ -25,7 +25,145 @@ class LandingSignup extends HTMLElement {
 
     if (!this.form) return;
     this.restore();
-    this.form.addEventListener('submit', () => this.stash());
+    this.initUpload();
+    this.form.addEventListener('submit', (event) => {
+      if (!this.validateUpload()) {
+        event.preventDefault();
+        return;
+      }
+      this.form.classList.add('is-submitting');
+      this.stash();
+    });
+  }
+
+  /* -- image upload ------------------------------------------------------ */
+
+  initUpload() {
+    this.upload = this.querySelector('[data-upload]');
+    if (!this.upload) return;
+
+    this.uploadInput = this.upload.querySelector('[data-upload-input]');
+    this.uploadUrl = this.upload.querySelector('[data-upload-url]');
+    this.uploadError = this.upload.querySelector('[data-upload-error]');
+    this.uploadBar = this.upload.querySelector('[data-upload-bar]');
+    this.uploadPreview = this.upload.querySelector('[data-upload-preview]');
+
+    this.uploadInput.addEventListener('change', () => {
+      const file = this.uploadInput.files[0];
+      if (file) this.send(file);
+    });
+
+    this.upload.querySelector('[data-upload-remove]').addEventListener('click', () => this.resetUpload());
+
+    // Drag and drop over the whole drop zone.
+    const drop = this.upload.querySelector('.landing-signup__upload-drop');
+    ['dragenter', 'dragover'].forEach((type) =>
+      drop.addEventListener(type, (event) => {
+        event.preventDefault();
+        this.upload.classList.add('is-dragging');
+      })
+    );
+    ['dragleave', 'drop'].forEach((type) =>
+      drop.addEventListener(type, (event) => {
+        event.preventDefault();
+        this.upload.classList.remove('is-dragging');
+      })
+    );
+    drop.addEventListener('drop', (event) => {
+      const file = event.dataTransfer.files[0];
+      if (file) this.send(file);
+    });
+  }
+
+  /** Blocks submit when an image is required but none finished uploading. */
+  validateUpload() {
+    if (!this.upload || !this.upload.hasAttribute('data-upload-required')) return true;
+    if (this.uploadUrl.value) return true;
+
+    this.setUploadError('Please add an image before submitting.');
+    this.upload.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+
+  setUploadError(message) {
+    this.uploadError.textContent = message || '';
+  }
+
+  resetUpload() {
+    this.uploadInput.value = '';
+    this.uploadUrl.value = '';
+    this.uploadPreview.hidden = true;
+    this.uploadBar.hidden = true;
+    this.upload.classList.remove('is-busy', 'is-done');
+    this.setUploadError('');
+  }
+
+  async send(file) {
+    this.setUploadError('');
+
+    const maxBytes = Number(this.upload.dataset.maxMb || 10) * 1024 * 1024;
+    if (file.size > maxBytes) {
+      this.resetUpload();
+      this.setUploadError(`That image is ${(file.size / 1048576).toFixed(1)}MB. The limit is ${this.upload.dataset.maxMb}MB.`);
+      return;
+    }
+
+    const accepted = (this.upload.dataset.accept || '').split(',').map((t) => t.trim()).filter(Boolean);
+    if (accepted.length && !accepted.includes(file.type)) {
+      this.resetUpload();
+      this.setUploadError('That file type is not supported.');
+      return;
+    }
+
+    if (!this.endpoint) {
+      this.setUploadError('Uploads are not configured yet.');
+      return;
+    }
+
+    // Show the preview straight away from the local file, before the round trip.
+    this.upload.querySelector('[data-upload-thumb]').src = URL.createObjectURL(file);
+    this.upload.querySelector('[data-upload-name]').textContent = file.name;
+    this.upload.querySelector('[data-upload-state]').textContent = 'Uploading…';
+    this.uploadPreview.hidden = false;
+    this.uploadBar.hidden = false;
+    this.upload.classList.add('is-busy');
+
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'upload',
+          filename: file.name,
+          mimeType: file.type,
+          data: await this.toBase64(file),
+        }),
+        redirect: 'follow',
+      });
+      const result = await response.json();
+      if (result.status !== 'ok' || !result.url) throw new Error(result.message || 'Upload failed');
+
+      this.uploadUrl.value = result.url;
+      this.upload.querySelector('[data-upload-state]').textContent = 'Added';
+      this.upload.classList.remove('is-busy');
+      this.upload.classList.add('is-done');
+    } catch (error) {
+      this.resetUpload();
+      this.setUploadError('That image could not be uploaded. Please try again.');
+      console.warn('landing-signup: upload failed', error);
+    } finally {
+      this.uploadBar.hidden = true;
+    }
+  }
+
+  /** Strips the `data:<mime>;base64,` prefix Apps Script does not want. */
+  toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1]);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
   }
 
   /** Reads every field, including the ones Shopify will drop. */
@@ -87,6 +225,17 @@ class LandingSignup extends HTMLElement {
         input.value = value;
       }
     });
+
+    // An already-uploaded image survives the bounce; show it as done.
+    const upload = this.querySelector('[data-upload]');
+    const url = upload && upload.querySelector('[data-upload-url]').value;
+    if (url) {
+      upload.querySelector('[data-upload-thumb]').src = url;
+      upload.querySelector('[data-upload-name]').textContent = 'Uploaded image';
+      upload.querySelector('[data-upload-state]').textContent = 'Added';
+      upload.querySelector('[data-upload-preview]').hidden = false;
+      upload.classList.add('is-done');
+    }
   }
 
   read() {
@@ -122,7 +271,7 @@ class LandingSignup extends HTMLElement {
       await fetch(this.endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(Object.assign({ action: 'append' }, payload)),
         redirect: 'follow',
         keepalive: true,
       });

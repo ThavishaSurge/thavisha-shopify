@@ -10,7 +10,7 @@
   confirmed the customer was accepted. See assets/landing-signup.js.
 {%- endcomment -%}
 
-{{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
+{{ 'section-landing-signup.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'landing-signup.js' | asset_url }}" defer="defer"></script>
 
 {%- style -%}
@@ -25,48 +25,6 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
-
-  .landing-signup__fields {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: 1fr;
-  }
-
-  @media screen and (min-width: 750px) {
-    .landing-signup__fields--split {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  .landing-signup__consent {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    margin: 2rem 0;
-  }
-
-  .landing-signup__consent input {
-    flex: 0 0 auto;
-    margin-top: 0.3rem;
-  }
-
-  .landing-signup__consent-label {
-    margin: 0;
-    font-size: 1.4rem;
-    line-height: 1.5;
-  }
-
-  .landing-signup__consent-label p {
-    margin: 0;
-  }
-
-  .landing-signup__button {
-    margin-top: 1rem;
-  }
-
-  .landing-signup__subheading {
-    margin-bottom: 2.5rem;
-  }
 {%- endstyle -%}
 
 {%- liquid
@@ -79,19 +37,24 @@
     data-endpoint="{{ section.settings.sheet_endpoint }}"
     data-section-id="{{ section.id }}"
   >
-    {%- if section.settings.heading != blank -%}
-      <h2 class="title title-wrapper--no-top-margin inline-richtext {{ section.settings.heading_size }}">
-        {{ section.settings.heading }}
-      </h2>
-    {%- endif -%}
+    <div class="landing-signup__inner">
+      <div class="landing-signup__header">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="landing-signup__title inline-richtext {{ section.settings.heading_size }}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
 
-    {%- if section.settings.subheading != blank -%}
-      <div class="landing-signup__subheading rte">{{ section.settings.subheading }}</div>
-    {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <div class="landing-signup__subheading rte">{{ section.settings.subheading }}</div>
+        {%- endif -%}
+      </div>
+
+      <div class="landing-signup__card">
 
     {%- form 'customer', id: form_id, class: 'landing-signup__form isolate' -%}
       {%- if form.posted_successfully? -%}
-        <div class="form-status-list form__message" data-signup-success>
+        <div class="landing-signup__success form__message" data-signup-success>
           <h2 class="form-status" tabindex="-1" autofocus>
             {{- 'icon-success.svg' | inline_asset_content -}}
             {{ section.settings.success_heading }}
@@ -280,6 +243,57 @@
           {%- endfor -%}
         </div>
 
+        {%- if section.settings.show_upload -%}
+          {%- comment -%}
+            Uploaded as soon as a file is picked, so only the resulting Shopify CDN
+            URL has to survive the page reload. See assets/landing-signup.js.
+          {%- endcomment -%}
+          <div
+            class="landing-signup__upload"
+            data-upload
+            data-max-mb="{{ section.settings.upload_max_mb }}"
+            {% if section.settings.upload_required %}data-upload-required{% endif %}
+            data-accept="{{ section.settings.upload_accept | escape }}"
+          >
+            <input
+              class="landing-signup__upload-input"
+              type="file"
+              id="{{ form_id }}-upload"
+              accept="{{ section.settings.upload_accept | escape }}"
+              data-upload-input
+            >
+            <label class="landing-signup__upload-drop" for="{{ form_id }}-upload">
+              <span class="svg-wrapper">{{- 'icon-plus.svg' | inline_asset_content -}}</span>
+              <span class="landing-signup__upload-title">{{ section.settings.upload_label }}</span>
+              <span class="landing-signup__upload-hint">
+                {{- section.settings.upload_hint }} &middot; Max {{ section.settings.upload_max_mb }}MB
+              </span>
+            </label>
+
+            <div class="landing-signup__upload-preview" data-upload-preview hidden>
+              <img class="landing-signup__upload-thumb" alt="" width="56" height="56" data-upload-thumb>
+              <span class="landing-signup__upload-meta">
+                <span class="landing-signup__upload-name" data-upload-name></span>
+                <span class="landing-signup__upload-state" data-upload-state></span>
+              </span>
+              <button type="button" class="landing-signup__upload-remove" data-upload-remove>
+                Remove
+              </button>
+            </div>
+
+            <div class="landing-signup__upload-bar" data-upload-bar hidden></div>
+            <small class="landing-signup__upload-error" data-upload-error role="alert"></small>
+
+            {%- comment -%} Holds the Shopify CDN URL; collected into the Sheet row. {%- endcomment -%}
+            <input
+              type="hidden"
+              data-extra-field
+              data-key="{{ section.settings.upload_column | escape }}"
+              data-upload-url
+            >
+          </div>
+        {%- endif -%}
+
         {%- comment -%}
           Required by design: the 'customer' form tag always sets accepts_marketing to
           true, so consent has to be a precondition of submitting rather than an
@@ -307,7 +321,9 @@
           </button>
         </div>
       {%- endif -%}
-    {%- endform -%}
+      {%- endform -%}
+      </div>
+    </div>
   </landing-signup>
 </div>
 
@@ -317,7 +333,10 @@
   "tag": "section",
   "class": "section",
   "disabled_on": {
-    "groups": ["header", "footer"]
+    "groups": [
+      "header",
+      "footer"
+    ]
   },
   "settings": [
     {
@@ -330,10 +349,22 @@
       "type": "select",
       "id": "heading_size",
       "options": [
-        { "value": "h2", "label": "Small" },
-        { "value": "h1", "label": "Medium" },
-        { "value": "h0", "label": "Large" },
-        { "value": "hxl", "label": "Extra large" }
+        {
+          "value": "h2",
+          "label": "Small"
+        },
+        {
+          "value": "h1",
+          "label": "Medium"
+        },
+        {
+          "value": "h0",
+          "label": "Large"
+        },
+        {
+          "value": "hxl",
+          "label": "Extra large"
+        }
       ],
       "default": "h1",
       "label": "Heading size"
@@ -391,6 +422,61 @@
       "id": "phone_required",
       "default": false,
       "label": "Require phone"
+    },
+    {
+      "type": "header",
+      "content": "Image upload"
+    },
+    {
+      "type": "paragraph",
+      "content": "Uploads go to Shopify Content > Files, and the file's CDN link is written to the Google Sheet. Requires an Admin API token in the Apps Script project (see SETUP.md)."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_upload",
+      "default": true,
+      "label": "Ask for an image"
+    },
+    {
+      "type": "text",
+      "id": "upload_label",
+      "default": "Add a photo",
+      "label": "Upload label"
+    },
+    {
+      "type": "text",
+      "id": "upload_hint",
+      "default": "PNG, JPG or WEBP",
+      "label": "Upload hint"
+    },
+    {
+      "type": "text",
+      "id": "upload_column",
+      "default": "Image",
+      "label": "Google Sheet column"
+    },
+    {
+      "type": "text",
+      "id": "upload_accept",
+      "default": "image/png,image/jpeg,image/webp",
+      "label": "Accepted file types",
+      "info": "Comma-separated MIME types."
+    },
+    {
+      "type": "range",
+      "id": "upload_max_mb",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "unit": "MB",
+      "default": 10,
+      "label": "Maximum file size"
+    },
+    {
+      "type": "checkbox",
+      "id": "upload_required",
+      "default": false,
+      "label": "Require an image"
     },
     {
       "type": "header",
@@ -480,12 +566,30 @@
           "type": "select",
           "id": "type",
           "options": [
-            { "value": "text", "label": "Short text" },
-            { "value": "textarea", "label": "Long text" },
-            { "value": "select", "label": "Dropdown" },
-            { "value": "tel", "label": "Phone" },
-            { "value": "email", "label": "Email" },
-            { "value": "url", "label": "URL" }
+            {
+              "value": "text",
+              "label": "Short text"
+            },
+            {
+              "value": "textarea",
+              "label": "Long text"
+            },
+            {
+              "value": "select",
+              "label": "Dropdown"
+            },
+            {
+              "value": "tel",
+              "label": "Phone"
+            },
+            {
+              "value": "email",
+              "label": "Email"
+            },
+            {
+              "value": "url",
+              "label": "URL"
+            }
           ],
           "default": "text",
           "label": "Field type"
@@ -509,7 +613,11 @@
   "presets": [
     {
       "name": "Landing signup",
-      "blocks": [{ "type": "question" }]
+      "blocks": [
+        {
+          "type": "question"
+        }
+      ]
     }
   ]
 }
