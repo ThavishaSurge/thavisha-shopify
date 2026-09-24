@@ -41,7 +41,7 @@
         "heading": "Rebate Form",
         "heading_size": "h1",
         "subheading": "<p>Sign up and we'll get back to you shortly!</p>",
-        "sheet_endpoint": "https://script.google.com/macros/s/AKfycbwJP1IARMP_YIQdJK5hUESBvfTuuArTwdZP_RvecpL5kOWs6zSuKmXddGPfSotaysPzWw/exec",
+        "sheet_endpoint": "https://script.google.com/macros/s/AKfycbykt4B8Bl0WX9NX96LBsKxHu9VK-lGKQD2EKUb8FHwGCWPJe52ODKW3tHnsV8dEOE1y3g/exec",
         "customer_tags": "landing-page",
         "show_phone": true,
         "phone_label": "Phone",
