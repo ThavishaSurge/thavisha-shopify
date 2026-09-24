@@ -11,13 +11,30 @@ body.template--bare .landing-signup {
   background-image: none;
 }
 
+/* Column, not row: the page stacks a logo bar above the form. Without the
+   explicit direction the two sections would sit side by side. */
 body.template--bare .content-for-layout {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   min-height: 100vh;
   min-height: 100svh;
+}
+
+body.template--bare .landing-header-section {
+  flex: 0 0 auto;
+}
+
+/* The form takes whatever height the logo bar leaves and centres inside it. */
+body.template--bare .landing-signup-section {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 4rem 0;
+}
+
+body.template--bare .landing-signup-section > * {
+  width: 100%;
 }
 
 body.template--bare .landing-signup {
@@ -402,8 +419,8 @@ body.template--bare .landing-signup {
 /* Mobile ------------------------------------------------------------------ */
 
 @media screen and (max-width: 749px) {
-  body.template--bare .content-for-layout {
-    align-items: flex-start;
+  body.template--bare .landing-signup-section {
+    justify-content: flex-start;
     padding: 3rem 0;
   }
 
