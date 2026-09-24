@@ -38,6 +38,7 @@
         "show_text_box": true,
         "desktop_content_alignment": "center",
         "color_scheme": "scheme-1",
+        "image_behavior": "none",
         "mobile_content_alignment": "center",
         "stack_images_on_mobile": true,
         "show_text_below": true
@@ -64,7 +65,7 @@
         "heading": "Join the list",
         "heading_size": "h1",
         "subheading": "<p>Sign up and we'll send you early access.</p>",
-        "sheet_endpoint": "",
+        "sheet_endpoint": "https://script.google.com/macros/s/AKfycbyCiMIr9BNYeyHGzZ90nxyA4OEv1wOX7rnxYRZ8-YZG1LfghAfTRXJ-moSHdSRBguWD5w/exec",
         "customer_tags": "landing-page",
         "show_phone": true,
         "phone_label": "Phone",
